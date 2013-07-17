@@ -1,32 +1,44 @@
 import pygame
-import colors
-import game_event
-import game_logic
+from game_logic import PongLogic
 import game_ui
-import global_vars as g
+from game_event import PongEvent
 
 
-def main(width, height):
-    pygame.init()
-    colors.init()
+class Pong(object):
+    """Pong game"""
+    def __init__(self, width, height):
+        super(Pong, self).__init__()
 
-    size = (width, height)
-    screen = pygame.display.set_mode(size)
-    pygame.display.set_caption("Test Game")
-    clock = pygame.time.Clock()
+        pygame.init()
 
-    g.done = False
-    while not g.done:
-        for event in pygame.event.get():
-            game_event.process(event)
+        self.initializeScreen(width, height)
 
-        game_logic.update()
+        self.clock = pygame.time.Clock()
+        self.eventRunner = PongEvent(self)
+        self.logic = PongLogic(width, height)
 
-        game_ui.update(screen)
+        self.main()
 
-        clock.tick(60)
+        pygame.quit()
 
-    return True
+    def initializeScreen(self, width, height):
+        self.size = (width, height)
+        self.screen = pygame.display.set_mode(self.size)
+        pygame.display.set_caption("Pong")
+
+    def main(self):
+        self.done = False
+        while not self.done:
+            for event in pygame.event.get():
+                self.eventRunner.process(event)
+
+            self.logic.update()
+
+            game_ui.update(self.screen, self.logic)
+
+            self.clock.tick(20)
+            if not __name__ == "__main__":
+                self.done = True
 
 if __name__ == "__main__":
-    main(600, 400)
+    Pong(600, 400)

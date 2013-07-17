@@ -1,5 +1,7 @@
-from main import main
+#import pygame
+from main import Pong
 
 
 def test_main():
-    assert main(600, 400)
+    for (width, height) in [(600, 400), (800, 600), (1200, 800)]:
+        Pong(width, height)

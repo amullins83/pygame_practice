@@ -1,15 +1,7 @@
-import global_vars as g
+from pygame import Color
 
-black = (0, 0, 0)
-red = (255, 0, 0)
-green = (0, 128, 0)
-blue = (0, 0, 255)
-white = (255, 255, 255)
-
-
-def init():
-    g.black = black
-    g.red = red
-    g.white = white
-    g.blue = blue
-    g.green = green
+black = Color(0, 0, 0)
+red = Color(255, 0, 0)
+green = Color(0, 128, 0)
+blue = Color(0, 0, 255)
+white = Color(255, 255, 255)

@@ -1,5 +1,4 @@
 import pygame
-import global_vars as g
 
 
 events = {
@@ -10,23 +9,25 @@ events = {
 }
 
 
-def process(event):
-    for e in events:
-        if events[e] == event.type:
-            globals()[e](event)
+class PongEvent(object):
+    """PongEvent: processes events for the pong game"""
+    def __init__(self, game):
+        super(PongEvent, self).__init__()
+        self.game = game
 
+    def process(self, event):
+        for e in events:
+            if events[e] == event.type:
+                getattr(self, e)(event)
 
-def QUIT(event):
-    g.done = True
+    def QUIT(self, event):
+        self.game.done = True
 
+    def KEYDOWN(self, event):
+        self.QUIT(event)
 
-def KEYDOWN(event):
-    QUIT(event)
+    def KEYUP(self, event):
+        pass
 
-
-def KEYUP(event):
-    pass
-
-
-def MOUSEBUTTONDOWN(event):
-    pass
+    def MOUSEBUTTONDOWN(self, event):
+        pass
