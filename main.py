@@ -26,5 +26,7 @@ def main(width, height):
 
         clock.tick(60)
 
+    return True
+
 if __name__ == "__main__":
-    main()
+    main(600, 400)

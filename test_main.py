@@ -1,5 +1,5 @@
-import main
+from main import main
 
 
 def test_main():
-    pass
+    assert main(600, 400)

@@ -2,26 +2,31 @@ import pygame
 import global_vars as g
 
 
-events = [pygame.QUIT, pygame.KEYDOWN, pygame.KEYUP, pygame.MOUSEBUTTONDOWN]
+events = {
+    "QUIT": pygame.QUIT,
+    "KEYDOWN": pygame.KEYDOWN,
+    "KEYUP": pygame.KEYUP,
+    "MOUSEBUTTONDOWN": pygame.MOUSEBUTTONDOWN
+}
 
 
 def process(event):
     for e in events:
-        if e == event:
-            getattr(__name__, e.__name__)()
+        if events[e] == event.type:
+            globals()[e](event)
 
 
-def QUIT():
+def QUIT(event):
     g.done = True
 
 
-def KEYDOWN():
+def KEYDOWN(event):
+    QUIT(event)
+
+
+def KEYUP(event):
     pass
 
 
-def KEYUP():
-    pass
-
-
-def MOUSEBUTTONDOWN():
+def MOUSEBUTTONDOWN(event):
     pass
