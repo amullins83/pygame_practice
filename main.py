@@ -1,6 +1,6 @@
 import pygame
 from game_logic import PongLogic
-import game_ui
+from game_ui import PongUI
 from game_event import PongEvent
 
 
@@ -16,7 +16,7 @@ class Pong(object):
         self.clock = pygame.time.Clock()
         self.eventRunner = PongEvent(self)
         self.logic = PongLogic(width, height)
-
+        self.ui = PongUI(self.screen, self.logic)
         self.main()
 
         pygame.quit()
@@ -34,7 +34,7 @@ class Pong(object):
 
             self.logic.update()
 
-            game_ui.update(self.screen, self.logic)
+            self.ui.update()
 
             self.clock.tick(60)
             if not __name__ == "__main__":
