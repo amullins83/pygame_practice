@@ -26,7 +26,7 @@ class PongObject(object):
     def __init__(self, name, pos=PongPos(), size=PongSize(), color=black):
         super(PongObject, self).__init__()
         self.name = name
-        self.pos = pos
+        self.pos = PongPos(pos.x, pos.y)
         self.history = []
         self.size = size
         self.color = color
@@ -42,9 +42,6 @@ class PongObject(object):
 
     def bottom(self):
         return self.pos.y + self.size.height
-
-    def didCollide(self, otherObject, hitDetector):
-        return hitDetector.collision(self, otherObject)
 
 
 class Pad(PongObject):
@@ -63,10 +60,15 @@ class Ball(PongObject):
     def __init__(self, pos=PongPos()):
         super(Ball, self).__init__("ball", pos, PongSize(Ball.defaultSize, Ball.defaultSize), green)
 
-        # Random initial velocity, don't allow 0, 0
-        self.velocity = PongPos()
-        while self.velocity == PongPos():
-            self.velocity = PongPos(randint(-1, 1), randint(-1, 1))
+        # Randomly choose one of four starting directions
+        self.directions = [(-1, -1), (-1, 1), (1, -1), (1, 1)]
+        self.speed = 10
+        self.restart(pos)
+
+    def restart(self, pos=PongPos()):
+        i = randint(0, 3)
+        self.velocity = PongPos(self.speed*self.directions[i][0], self.speed*self.directions[i][1])
+        self.pos = PongPos(pos.x, pos.y)
 
 
 class PongLogic(object):
@@ -79,7 +81,7 @@ class PongLogic(object):
         self.width = width
         self.height = height
 
-        self.ballSize = 20
+        self.ballSize = Ball.defaultSize
         self.ballStart = PongPos((self.width - self.ballSize) / 2,
                                  (self.height - self.ballSize) / 2)
 
@@ -101,23 +103,28 @@ class PongLogic(object):
 
     def update(self):
         if self.status == Running:
-            if self.ball.didCollide(self.pad1, self.hitDetector) or self.ball.didCollide(self.pad2, self.hitDetector):
-                self.ball.velocity.x = -self.ball.velocity.x
-
-            if self.hitDetector.didHitYBoundary(self.ball):
-                self.ball.velocity.y = -self.ball.velocity.y
-
             if self.hitDetector.didHitXBoundary(self.ball):
-                if self.ball.pos.x < 20:
+                print("Boundary X Hit")
+                if self.width - self.ball.pos.x <= Ball.defaultSize:
                     self.score[0] += 1
                     if self.score[0] >= self.scoreMax:
                         self.status = Player1Win
+                        print("Player 1 Wins")
                 else:
                     self.score[1] += 1
                     if self.score[1] >= self.scoreMax:
                         self.status = Player2Win
+                        print("Player 2 Wins")
+                print("Player 1: " + str(self.score[0]) + ", Player 2: " + str(self.score[1]))
+                self.ball.restart(self.ballStart)
 
-                self.ball = Ball(self.ballStart)
+            else:
+                if self.hitDetector.collision(self.ball, self.pad1) or self.hitDetector.collision(self.ball, self.pad2):
+                    self.ball.velocity.x = -self.ball.velocity.x
+                    print("Pad Hit")
+                elif self.hitDetector.didHitYBoundary(self.ball):
+                    self.ball.velocity.y = -self.ball.velocity.y
+                    print("Boundary Y Hit")
 
-            self.ball.pos.x += self.ball.velocity.x
-            self.ball.pos.y += self.ball.velocity.y
+                self.ball.pos.x += self.ball.velocity.x
+                self.ball.pos.y += self.ball.velocity.y
