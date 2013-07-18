@@ -115,14 +115,17 @@ class PongLogic(object):
         self.hitDetector = HitDetector(0, 0, 600, 400)
         self.pads = [self.pad1, self.pad2]
 
+        self.message = ""
+
     def keyResponse(self, key, func):
-        for i in range(len(Keys)):
-            if key == Keys[i]:
-                if i < 2:
-                    getattr(self.pad1, func)(i)
-                else:
-                    getattr(self.pad2, func)(i - 2)
-                break
+        if self.status == Running:
+            for i in range(len(Keys)):
+                if key == Keys[i]:
+                    if i < 2:
+                        getattr(self.pad1, func)(i)
+                    else:
+                        getattr(self.pad2, func)(i - 2)
+                    break
 
     def pressKey(self, key):
         self.keyResponse(key, "startMove")
@@ -138,12 +141,12 @@ class PongLogic(object):
                     self.score[0] += 1
                     if self.score[0] >= self.scoreMax:
                         self.status = Player1Win
-                        print("Player 1 Wins")
+                        self.message = "Player 1 Wins"
                 else:
                     self.score[1] += 1
                     if self.score[1] >= self.scoreMax:
                         self.status = Player2Win
-                        print("Player 2 Wins")
+                        self.message = "Player 2 Wins"
                 print("Player 1: " + str(self.score[0]) + ", Player 2: " + str(self.score[1]))
                 self.ball.restart(self.ballStart)
 
@@ -166,6 +169,9 @@ class PongLogic(object):
 
             for pad in self.pads:
                 self.updatePad(pad)
+
+            if len(self.message):
+                print(self.message)
 
     def updatePad(self, pad):
         if self.hitDetector.didHitYBoundary(pad):

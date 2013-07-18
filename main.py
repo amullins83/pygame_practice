@@ -8,21 +8,20 @@ class Pong(object):
     """Pong game"""
     def __init__(self, width, height):
         super(Pong, self).__init__()
+        self.width = width
+        self.height = height
+        self.size = (self.width, self.height)
+
+        self.initializeScreen()
 
         pygame.init()
 
-        self.initializeScreen(width, height)
-
-        self.clock = pygame.time.Clock()
-        self.eventRunner = PongEvent(self)
-        self.logic = PongLogic(width, height)
-        self.ui = PongUI(self.screen, self.logic)
+        self.restart()
         self.main()
 
         pygame.quit()
 
-    def initializeScreen(self, width, height):
-        self.size = (width, height)
+    def initializeScreen(self):
         self.screen = pygame.display.set_mode(self.size)
         pygame.display.set_caption("Pong")
 
@@ -46,6 +45,11 @@ class Pong(object):
     def releaseKey(self, key):
         self.logic.releaseKey(key)
 
+    def restart(self):
+        self.clock = pygame.time.Clock()
+        self.eventRunner = PongEvent(self)
+        self.logic = PongLogic(self.width, self.height)
+        self.ui = PongUI(self.screen, self.logic)
 
 if __name__ == "__main__":
     Pong(600, 400)
