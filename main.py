@@ -36,7 +36,7 @@ class Pong(object):
 
             game_ui.update(self.screen, self.logic)
 
-            self.clock.tick(20)
+            self.clock.tick(60)
             if not __name__ == "__main__":
                 self.done = True
 

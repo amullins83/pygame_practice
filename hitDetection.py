@@ -5,26 +5,37 @@ class HitDetector(object):
         self.boundary = ((xstart, ystart), (xend, yend))
 
     def didHitXBoundary(self, thing):
-        return (thing.pos.x <= self.boundary[0][0]) or ((thing.pos.x + thing.size.width) >= self.boundary[1][0])
+        return (thing.left() <= self.boundary[0][0] and thing.velocity.x < 0) or (thing.right() >= self.boundary[1][0] and thing.velocity.x > 0)
 
     def didHitYBoundary(self, thing):
-        return (thing.pos.y <= self.boundary[0][1]) or ((thing.pos.y + thing.size.height) >= self.boundary[1][1])
+        return (thing.top() <= self.boundary[0][1] and thing.velocity.y < 0) or (thing.bottom() >= self.boundary[1][1] and thing.velocity.y > 0)
 
-    def collision(self, thing1, thing2):
-        collided = collidedVert = collidedHoriz = False
-        if thing1.left() <= thing2.left():
-            collidedHoriz = thing1.right() >= thing2.left()
-        else:
-            collidedHoriz = thing1.left() <= thing2.right()
+    def didCollide(self, thing1, thing2):
+        return self.didCollideHoriz(thing1, thing2) or self.didCollideVert(thing1, thing2)
 
-        if thing1.top() <= thing2.top():
-            collidedVert = thing1.bottom() >= thing2.top()
-        else:
-            collidedVert = thing1.top() <= thing2.bottom()
+    def didCollideVert(self, thing1, thing2):
+        return self.didCollideTop(thing1, thing2) or self.didCollideBottom(thing1, thing2)
 
-        collided = collidedVert and collidedHoriz
+    def didCollideHoriz(self, thing1, thing2):
+        return self.didCollideLeft(thing1, thing2) or self.didCollideRight(thing1, thing2)
 
-        if collided:
-            print(thing1.name + "(" + str(thing1.left()) + ", " + str(thing1.top()) + ") collided with " + thing2.name + "(" + str(thing2.left()) + ", " + str(thing2.top()) + ")")
+    def didCollideTop(self, thing1, thing2):
+        return thing1.velocity.y > thing2.velocity.y and thing1.bottom() >= thing2.top() and self.inside(thing1, thing2)
 
-        return collided
+    def didCollideBottom(self, thing1, thing2):
+        return thing1.velocity.y < thing2.velocity.y and thing1.top() <= thing2.bottom() and self.inside(thing1, thing2)
+
+    def didCollideLeft(self, thing1, thing2):
+        return thing1.velocity.x > thing2.velocity.x and thing1.right() >= thing2.left() and self.inside(thing1, thing2)
+
+    def didCollideRight(self, thing1, thing2):
+        return thing1.velocity.x < thing2.velocity.x and thing1.left() <= thing2.right() and self.inside(thing1, thing2)
+
+    def inside(self, thing1, thing2):
+        return self.insideHoriz(thing1, thing2) and self.insideVert(thing1, thing2)
+
+    def insideHoriz(self, thing1, thing2):
+        return thing1.right() >= thing2.left() and thing1.left() <= thing2.right()
+
+    def insideVert(self, thing1, thing2):
+        return thing1.bottom() >= thing2.top() and thing1.top() <= thing2.bottom()

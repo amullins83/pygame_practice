@@ -32,6 +32,7 @@ class PongObject(object):
         self.history = []
         self.size = size
         self.color = color
+        self.velocity = PongPos()
 
     def left(self):
         return self.pos.x
@@ -53,8 +54,7 @@ class Pad(PongObject):
 
     def __init__(self, name, pos=PongPos()):
         super(Pad, self).__init__(name, pos, PongSize(Pad.defaultWidth, Pad.defaultHeight), red)
-        self.velocity = PongPos()
-        self.speed = 10
+        self.speed = 3
 
     def startMove(self, directionDown):
         if directionDown:
@@ -62,8 +62,9 @@ class Pad(PongObject):
         else:
             self.velocity.y = self.speed
 
-    def endMove(self):
-        self.velocity.y = 0
+    def endMove(self, directionDown):
+        if (self.velocity.y < 0 and directionDown) or (self.velocity.y > 0 and not directionDown):
+            self.velocity.y = 0
 
 
 class Ball(PongObject):
@@ -75,7 +76,7 @@ class Ball(PongObject):
 
         # Randomly choose one of four starting directions
         self.directions = [(-1, -1), (-1, 1), (1, -1), (1, 1)]
-        self.speed = 10
+        self.speed = 5
         self.restart(pos)
 
     def restart(self, pos=PongPos()):
@@ -114,23 +115,20 @@ class PongLogic(object):
         self.hitDetector = HitDetector(0, 0, 600, 400)
         self.pads = [self.pad1, self.pad2]
 
-    def pressKey(self, key):
+    def keyResponse(self, key, func):
         for i in range(len(Keys)):
             if key == Keys[i]:
                 if i < 2:
-                    self.pad1.startMove(i)
+                    getattr(self.pad1, func)(i)
                 else:
-                    self.pad2.startMove(i - 2)
+                    getattr(self.pad2, func)(i - 2)
                 break
 
+    def pressKey(self, key):
+        self.keyResponse(key, "startMove")
+
     def releaseKey(self, key):
-        for i in range(len(Keys)):
-            if key == Keys[i]:
-                if i < 2:
-                    self.pad1.endMove()
-                else:
-                    self.pad2.endMove()
-                break
+        self.keyResponse(key, "endMove")
 
     def update(self):
         if self.status == Running:
@@ -150,10 +148,16 @@ class PongLogic(object):
                 self.ball.restart(self.ballStart)
 
             else:
-                if self.hitDetector.collision(self.ball, self.pad1) or self.hitDetector.collision(self.ball, self.pad2):
-                    self.ball.velocity.x = -self.ball.velocity.x
-                    print("Pad Hit")
-                elif self.hitDetector.didHitYBoundary(self.ball):
+                if self.hitDetector.didCollide(self.ball, self.pad1) or self.hitDetector.didCollide(self.ball, self.pad2):
+                    if self.hitDetector.didCollideRight(self.ball, self.pad1) or self.hitDetector.didCollideLeft(self.ball, self.pad2):
+                        self.ball.velocity.x = -self.ball.velocity.x
+                        print("Pad Hit Horizontal")
+
+                    if self.hitDetector.didCollideVert(self.ball, self.pad1) or self.hitDetector.didCollideVert(self.ball, self.pad2):
+                        self.ball.velocity.y = -self.ball.velocity.y
+                        print("Pad Hit Vertical")
+
+                if self.hitDetector.didHitYBoundary(self.ball):
                     self.ball.velocity.y = -self.ball.velocity.y
                     print("Boundary Y Hit")
 
@@ -166,9 +170,9 @@ class PongLogic(object):
     def updatePad(self, pad):
         if self.hitDetector.didHitYBoundary(pad):
             print(pad.name + " boundary Y hit")
-            if pad.pos.y + pad.size.height >= self.height:
-                pad.pos.y -= pad.speed
+            if pad.bottom() > self.height/2:
+                pad.pos.y = self.height - pad.size.height
             else:
-                pad.pos.y += pad.speed
+                pad.pos.y = 0
         else:
             pad.pos.y += pad.velocity.y
