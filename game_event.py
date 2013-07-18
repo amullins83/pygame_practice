@@ -24,11 +24,13 @@ class PongEvent(object):
         self.game.done = True
 
     def KEYDOWN(self, event):
-        if event.key == pygame.K_q:
-            self.QUIT(event)
-        elif event.key == pygame.K_r:
-            self.RESTART(event)
-        self.game.pressKey(event.key)
+        if self.game.running():
+            self.game.pressKey(event.key)
+        else:
+            if event.key == pygame.K_q:
+                self.QUIT(event)
+            elif event.key == pygame.K_r:
+                self.RESTART(event)
 
     def KEYUP(self, event):
         self.game.releaseKey(event.key)

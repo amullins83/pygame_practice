@@ -45,6 +45,9 @@ class Pong(object):
     def releaseKey(self, key):
         self.logic.releaseKey(key)
 
+    def running(self):
+        return self.logic.running()
+
     def restart(self):
         self.clock = pygame.time.Clock()
         self.eventRunner = PongEvent(self)

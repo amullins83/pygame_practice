@@ -135,50 +135,55 @@ class PongLogic(object):
 
     def update(self):
         if self.status == Running:
-            if self.hitDetector.didHitXBoundary(self.ball):
-                print("Boundary X Hit")
-                if self.width - self.ball.pos.x <= Ball.defaultSize:
-                    self.score[0] += 1
-                    if self.score[0] >= self.scoreMax:
-                        self.status = Player1Win
-                        self.message = "Player 1 Wins"
-                else:
-                    self.score[1] += 1
-                    if self.score[1] >= self.scoreMax:
-                        self.status = Player2Win
-                        self.message = "Player 2 Wins"
-                print("Player 1: " + str(self.score[0]) + ", Player 2: " + str(self.score[1]))
-                self.ball.restart(self.ballStart)
-
-            else:
-                if self.hitDetector.didCollide(self.ball, self.pad1) or self.hitDetector.didCollide(self.ball, self.pad2):
-                    if self.hitDetector.didCollideRight(self.ball, self.pad1) or self.hitDetector.didCollideLeft(self.ball, self.pad2):
-                        self.ball.velocity.x = -self.ball.velocity.x
-                        print("Pad Hit Horizontal")
-
-                    if self.hitDetector.didCollideVert(self.ball, self.pad1) or self.hitDetector.didCollideVert(self.ball, self.pad2):
-                        self.ball.velocity.y = -self.ball.velocity.y
-                        print("Pad Hit Vertical")
-
-                if self.hitDetector.didHitYBoundary(self.ball):
-                    self.ball.velocity.y = -self.ball.velocity.y
-                    print("Boundary Y Hit")
-
-                self.ball.pos.x += self.ball.velocity.x
-                self.ball.pos.y += self.ball.velocity.y
-
+            self.updateBall()
             for pad in self.pads:
                 self.updatePad(pad)
 
-            if len(self.message):
-                print(self.message)
+    def updateBall(self):
+        if self.hitDetector.didHitXBoundary(self.ball):
+            self.updateScore()
+        else:
+            self.checkPadHit()
+            self.checkBoundary()
+            self.incrementBallPosition()
+
+    def updateScore(self):
+        if self.width - self.ball.pos.x <= Ball.defaultSize:
+            self.score[0] += 1
+            if self.score[0] >= self.scoreMax:
+                self.status = Player1Win
+                self.message = "Player 1 Wins"
+        else:
+            self.score[1] += 1
+            if self.score[1] >= self.scoreMax:
+                self.status = Player2Win
+                self.message = "Player 2 Wins"
+        self.ball.restart(self.ballStart)
+
+    def checkPadHit(self):
+        if self.hitDetector.didCollide(self.ball, self.pad1) or self.hitDetector.didCollide(self.ball, self.pad2):
+            if self.hitDetector.didCollideRight(self.ball, self.pad1) or self.hitDetector.didCollideLeft(self.ball, self.pad2):
+                self.ball.velocity.x = -self.ball.velocity.x
+
+            if self.hitDetector.didCollideVert(self.ball, self.pad1) or self.hitDetector.didCollideVert(self.ball, self.pad2):
+                self.ball.velocity.y = -self.ball.velocity.y
+
+    def checkBoundary(self):
+        if self.hitDetector.didHitYBoundary(self.ball):
+                self.ball.velocity.y = -self.ball.velocity.y
+
+    def incrementBallPosition(self):
+        self.ball.pos.x += self.ball.velocity.x
+        self.ball.pos.y += self.ball.velocity.y
 
     def updatePad(self, pad):
         if self.hitDetector.didHitYBoundary(pad):
-            print(pad.name + " boundary Y hit")
             if pad.bottom() > self.height/2:
                 pad.pos.y = self.height - pad.size.height
             else:
                 pad.pos.y = 0
         else:
             pad.pos.y += pad.velocity.y
+
+    def running(self):
+        return self.status == Running
