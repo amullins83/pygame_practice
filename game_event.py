@@ -24,10 +24,10 @@ class PongEvent(object):
         self.game.done = True
 
     def KEYDOWN(self, event):
-        self.QUIT(event)
+        self.game.pressKey(event.key)
 
     def KEYUP(self, event):
-        pass
+        self.game.releaseKey(event.key)
 
     def MOUSEBUTTONDOWN(self, event):
         pass

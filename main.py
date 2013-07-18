@@ -40,5 +40,12 @@ class Pong(object):
             if not __name__ == "__main__":
                 self.done = True
 
+    def pressKey(self, key):
+        self.logic.pressKey(key)
+
+    def releaseKey(self, key):
+        self.logic.releaseKey(key)
+
+
 if __name__ == "__main__":
     Pong(600, 400)

@@ -1,8 +1,10 @@
+import pygame
 from colors import *
 from hitDetection import HitDetector
 from random import randint
 
 Running, Player1Win, Player2Win = range(3)
+Keys = [pygame.K_DOWN, pygame.K_UP]
 
 
 class PongPos(object):
@@ -51,6 +53,17 @@ class Pad(PongObject):
 
     def __init__(self, name, pos=PongPos()):
         super(Pad, self).__init__(name, pos, PongSize(Pad.defaultWidth, Pad.defaultHeight), red)
+        self.velocity = PongPos()
+        self.speed = 10
+
+    def startMove(self, directionDown):
+        if directionDown:
+            self.velocity.y = -self.speed
+        else:
+            self.velocity.y = self.speed
+
+    def endMove(self):
+        self.velocity.y = 0
 
 
 class Ball(PongObject):
@@ -101,6 +114,18 @@ class PongLogic(object):
         self.hitDetector = HitDetector(0, 0, 600, 400)
         self.pads = [self.pad1, self.pad2]
 
+    def pressKey(self, key):
+        for i in range(len(Keys)):
+            if key == Keys[i]:
+                self.pad1.startMove(i)
+                break
+
+    def releaseKey(self, key):
+        for i in range(len(Keys)):
+            if key == Keys[i]:
+                self.pad1.endMove()
+                break
+
     def update(self):
         if self.status == Running:
             if self.hitDetector.didHitXBoundary(self.ball):
@@ -128,3 +153,10 @@ class PongLogic(object):
 
                 self.ball.pos.x += self.ball.velocity.x
                 self.ball.pos.y += self.ball.velocity.y
+
+            if self.hitDetector.didHitYBoundary(self.pad1):
+                print("Pad1 boundary Y hit")
+                self.pad1.pos.y += -self.pad1.velocity.y
+                self.pad1.endMove()
+            else:
+                self.pad1.pos.y += self.pad1.velocity.y
